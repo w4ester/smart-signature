@@ -247,15 +247,12 @@
         let selectedTemplate = 1;
 
         function showTab(tabName) {
-            // Hide all sections
             document.querySelectorAll('.section').forEach(section => {
                 section.style.display = 'none';
             });
             
-            // Show selected section
             document.getElementById(tabName).style.display = 'block';
             
-            // Update active tab
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.classList.remove('active');
             });
@@ -289,7 +286,6 @@
             updateLinkList();
             updateSignature();
 
-            // Clear inputs
             document.getElementById('link-title').value = '';
             document.getElementById('link-url').value = '';
             document.getElementById('email-list').value = '';
@@ -327,59 +323,52 @@
         }
 
         function getTemplateHTML(data) {
+            let signatureContent = '';
+            
             switch (selectedTemplate) {
                 case 1: // Classic
-                    return `
-                        <div style="font-family: Arial, sans-serif; line-height: 1.4;">
-                            <p style="margin: 0;"><strong>${data.name}</strong></p>
-                            <p style="margin: 0; color: #666;">${data.title}</p>
-                            <p style="margin: 0;">${data.company}</p>
-                            <p style="margin: 10px 0;">
-                                <a href="mailto:${data.email}" style="color: #2563eb; text-decoration: none;">${data.email}</a><br>
-                                ${data.phone}
-                            </p>
-                            ${getLinksHTML(data.links)}
-                        </div>
-                    `;
+                    signatureContent = `
+                        <p style="margin: 0;"><strong>${data.name}</strong></p>
+                        <p style="margin: 5px 0; color: #2563eb;">${data.title}${data.company ? ' | ' + data.company : ''}</p>
+                        <p style="margin: 10px 0;">
+                            ${data.email ? `<a href="mailto:${data.email}" style="color: #2563eb; text-decoration: none;">${data.email}</a><br>` : ''}
+                            ${data.phone || ''}
+                        </p>
+                        ${getLinksHTML(data.links)}`;
+                    break;
+                    
                 case 2: // Modern
-                    return `
-                        <div style="font-family: Arial, sans-serif; line-height: 1.4; padding: 15px; border-left: 4px solid #2563eb;">
-                            <p style="margin: 0; font-size: 18px;"><strong>${data.name}</strong></p>
-                            <p style="margin: 5px 0; color: #2563eb;">${data.title} | ${data.company}</p>
-                            <p style="margin: 10px 0;">
-                                📧 <a href="mailto:${data.email}" style="color: #2563eb; text-decoration: none;">${data.email}</a><br>
-                                📱 ${data.phone}
-                            </p>
-                            ${getLinksHTML(data.links)}
-                        </div>
-                    `;
+                    signatureContent = `
+                        <p style="margin: 0;"><strong>${data.name}</strong></p>
+                        <p style="margin: 5px 0; color: #2563eb;">${data.title}${data.company ? ' | ' + data.company : ''}</p>
+                        <p style="margin: 10px 0;">
+                            ${data.email ? `<a href="mailto:${data.email}" style="color: #2563eb; text-decoration: none;">${data.email}</a><br>` : ''}
+                            ${data.phone || ''}
+                        </p>
+                        ${getLinksHTML(data.links)}`;
+                    break;
+                    
                 case 3: // Minimal
-                    return `
-                        <div style="font-family: Arial, sans-serif; line-height: 1.4;">
-                            <p style="margin: 0;">${data.name} · ${data.title}</p>
-                            <p style="margin: 5px 0;">
-                                <a href="mailto:${data.email}" style="color: #2563eb; text-decoration: none;">${data.email}</a>
-                            </p>
-                            ${getLinksHTML(data.links)}
-                        </div>
-                    `;
+                    signatureContent = `
+                        <p style="margin: 0;">${data.name}${data.title ? ' · ' + data.title : ''}</p>
+                        <p style="margin: 5px 0;">
+                            ${data.email ? `<a href="mailto:${data.email}" style="color: #2563eb; text-decoration: none;">${data.email}</a>` : ''}
+                        </p>
+                        ${getLinksHTML(data.links)}`;
+                    break;
             }
+            
+            return signatureContent;
         }
 
         function getLinksHTML(links) {
             if (!links.length) return '';
             
-            return `
-                <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee;">
-                    ${links.map(link => `
-                        <a href="${link.url}" 
-                           style="display: inline-block; margin-right: 10px; color: #2563eb; text-decoration: none;"
-                           data-visibility="${link.visibility}"
-                           data-emails="${link.emails.join(',')}"
-                        >${link.title}</a>
-                    `).join('')}
-                </div>
-            `;
+            const linkElements = links.map(link => 
+                `<a href="${link.url}" style="color: #2563eb; text-decoration: none;">${link.title}</a>`
+            ).join(' · ');
+            
+            return `<p style="margin-top: 10px;">${linkElements}</p>`;
         }
 
         function updateSignature() {
@@ -392,14 +381,25 @@
                 links: links
             };
 
-            document.getElementById('signature').innerHTML = getTemplateHTML(data);
+            const signatureContent = getTemplateHTML(data);
+            document.getElementById('signature').innerHTML = signatureContent;
         }
 
         function copySignature() {
-            const signatureHTML = document.getElementById('signature').innerHTML;
-            navigator.clipboard.writeText(signatureHTML).then(() => {
+            const signatureDiv = document.getElementById('signature');
+            const range = document.createRange();
+            range.selectNode(signatureDiv);
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
+            
+            try {
+                document.execCommand('copy');
+                window.getSelection().removeAllRanges();
                 alert('Signature copied to clipboard!');
-            });
+            } catch (err) {
+                console.error('Failed to copy signature:', err);
+                alert('Failed to copy signature. Please try again.');
+            }
         }
 
         function downloadHTML() {

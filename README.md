@@ -104,7 +104,7 @@ sudo cp index.html /usr/share/nginx/html/
 1. **Data Privacy**
 - All data is processed locally in the browser
 - No data is sent to any external servers
-- User information is not stored permanently
+- User information is not stored permanently (other than when you save your new email signature in your preferred client) feature add could be that saved locally if that is something enterprise want to share with team(s)...will make feature just in case.
 
 2. **Link Security**
 - All links are generated with HTTPS by default

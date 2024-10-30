@@ -183,4 +183,4 @@ Planned features:
 - Analytics integration
 
 ## License
-- 4ester License - Modify and sahre to use in a project(s)
+- 4ester License - Modify and share for your use and others
